@@ -18,6 +18,7 @@ class Dispatcher(QAbstractNativeEventFilter):
     def __init__(self):
         super().__init__()
         self._handlers = {}
+        self._last = None
 
     def on(self, msg_id, fn):
         self._handlers.setdefault(msg_id, []).append(fn)
@@ -25,6 +26,11 @@ class Dispatcher(QAbstractNativeEventFilter):
     def nativeEventFilter(self, event_type, message):
         if bytes(event_type) == b"windows_generic_MSG":
             msg = wintypes.MSG.from_address(int(message))
+            # Qt can hand the same message to the filter twice; handlers must run once.
+            key = (msg.message, msg.wParam, msg.lParam, msg.time)
+            if key == self._last:
+                return False, 0
+            self._last = key
             for fn in self._handlers.get(msg.message, ()):
                 fn(msg)
         return False, 0
