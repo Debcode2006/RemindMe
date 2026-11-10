@@ -2,6 +2,8 @@
 import ctypes
 from ctypes import wintypes
 
+from PySide6.QtWidgets import QSystemTrayIcon
+
 import probe
 
 WM_HOTKEY = 0x0312
@@ -45,7 +47,7 @@ def install(spike, spec):
         err = ctypes.get_last_error()
         hint = " (ERROR_HOTKEY_ALREADY_REGISTERED: another app owns it)" if err == 1409 else ""
         probe.log(f"HOTKEY registration FAILED for {spec}: error {err}{hint}; app keeps running")
-        spike.tray.showMessage("RemindMe spike", f"Hotkey {spec} is unavailable", spike.tray.Warning, 4000)
+        spike.tray.showMessage("RemindMe spike", f"Hotkey {spec} is unavailable", QSystemTrayIcon.MessageIcon.Warning, 4000)
         return
     probe.log(f"HOTKEY registered {spec}")
     spike.app.aboutToQuit.connect(lambda: _u32.UnregisterHotKey(spike.hwnd, HOTKEY_ID))
