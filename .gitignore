@@ -5,3 +5,5 @@ build/
 dist/
 *.spec
 spike/*.log
+spike/dist/
+spike/build/
